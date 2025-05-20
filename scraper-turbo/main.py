@@ -12,9 +12,13 @@ def main():
     print(response.text)
     soup = BeautifulSoup(response.text, "html.parser")
     print(soup.prettify())
+
+    with open("index.html", "w", encoding="utf-8") as file:
+        file.write(soup.prettify())
+    
     all = soup.find_all('div', 'products-i vipped')
     print(all)
-    with open("index.html", "w", encoding="utf-8") as file:
+    with open("result.html", "w", encoding="utf-8") as file:
         file.write("\n".join(str(item) for item in all))
 
 if __name__ == "__main__":
