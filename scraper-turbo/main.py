@@ -1,8 +1,10 @@
 import requests
 import time
+import re
 from bs4 import BeautifulSoup # type: ignore
 from lxml import html # type: ignore
-import cssselect # type: ignore
+from lxml.etree import tostring
+
 
 INDEX_FILE = "templates/index.html"
 CAR_INFO_FILE = "templates/car_info.html"
@@ -48,15 +50,27 @@ def main_lxml():
     #print(response.text)
     tree = html.fromstring(response.text)
     elements = tree.cssselect('div.products-i.vipped')
-    ele = list()
+    html_blocks = []
+    ids = set()
+
     for el in elements:
-        print(el.text_content())
-        ele.append(el.text_content())
+        html_blocks.append(tostring(el, pretty_print=True, encoding='unicode'))
+        
+        # Extract bookmark <a> and get ID from href
+        bookmark_links = el.cssselect('a[href*="/bookmarks"]')
+        for a in bookmark_links:
+            href = a.get("href", "")
+            match = re.search(r'/autos/(\d+)-', href)
+            if match:
+                ids.add(match.group(1))
+    #print(elements[0].tostring())
+    #ele = [el.text_content() for el in elements]
     end = time.time()
     print(f"lxml time: {end - start:.4f} seconds")
     print(f"Found items: {len(elements)}")
+    print(f"Extracted IDs: {ids}")
     with open(TEST_FILE, "w", encoding="utf-8") as file:
-        file.write(str(ele))
+        file.write('\n\n'.join(html_blocks))
     
 def get_specific_car_info(car_id: str):
     car_url = f"{BASE_URL}/autos/{car_id}"
