@@ -40,29 +40,34 @@ def main_bs4():
     with open(RESULT_FILE, "w", encoding="utf-8") as file:
         file.write("\n".join(str(item) for item in all))
 
-def main_lxml():
-    url = f"{BASE_URL}/autos"
-    print("Fetching with lxml...")
-    start = time.time()
-    
-    response = requests.get(url, headers=HEADERS)
-    #print(response.status_code)
-    #print(response.text)
-    tree = html.fromstring(response.text)
-    elements = tree.cssselect('div.products-i.vipped')
+def main_lxml(max_pages: int = 5):
     html_blocks = []
     ids = set()
+    for page in range(1, max_pages + 1):
+        if page > 1: pagination_url = f"?page={page}"
+        else: pagination_url = ""
 
-    for el in elements:
-        html_blocks.append(tostring(el, pretty_print=True, encoding='unicode'))
+        url = f"{BASE_URL}/autos{pagination_url}"
+        print("Fetching with lxml...")
+        start = time.time()
         
-        # Extract bookmark <a> and get ID from href
-        bookmark_links = el.cssselect('a[href*="/bookmarks"]')
-        for a in bookmark_links:
-            href = a.get("href", "")
-            match = re.search(r'/autos/(\d+)-', href)
-            if match:
-                ids.add(match.group(1))
+        response = requests.get(url, headers=HEADERS)
+        #print(response.status_code)
+        #print(response.text)
+        tree = html.fromstring(response.text)
+        elements = tree.cssselect('div.products-i.vipped')
+
+
+        for el in elements:
+            html_blocks.append(tostring(el, pretty_print=True, encoding='unicode'))
+            
+            # Extract bookmark <a> and get ID from href
+            bookmark_links = el.cssselect('a[href*="/bookmarks"]')
+            for a in bookmark_links:
+                href = a.get("href", "")
+                match = re.search(r'/autos/(\d+)-', href)
+                if match:
+                    ids.add(match.group(1))
     #print(elements[0].tostring())
     #ele = [el.text_content() for el in elements]
     end = time.time()
@@ -82,5 +87,5 @@ def get_specific_car_info(car_id: str):
 
 if __name__ == "__main__":
     main_bs4()
-    main_lxml()
+    main_lxml(5)
     #get_specific_car_info("9453404")
