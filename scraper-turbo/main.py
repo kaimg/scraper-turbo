@@ -1,0 +1,21 @@
+import requests
+from bs4 import BeautifulSoup # type: ignore
+
+
+def main():
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    }
+    url = "https://turbo.az/autos"
+    response = requests.get(url, headers=headers)
+    print(response.status_code)
+    print(response.text)
+    soup = BeautifulSoup(response.text, "html.parser")
+    print(soup.prettify())
+    all = soup.find_all('div', 'products-i vipped')
+    print(all)
+    with open("index.html", "w", encoding="utf-8") as file:
+        file.write("\n".join(str(item) for item in all))
+
+if __name__ == "__main__":
+    main()
