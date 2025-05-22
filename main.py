@@ -100,20 +100,64 @@ def get_specific_car_info():
 def get_car_info_from_file():
     with open(CAR_INFO_FILE, "r", encoding="utf-8") as file:
         car_info = file.read()
-    
+
+    price_pattern = re.compile(r'([\d\s]+?)\s+([A-Z]{3}|\$|AZN)')
+
     tree = html.fromstring(car_info)
+    properties = tree.cssselect("div.product-properties__i")
+
+    price_elem = tree.cssselect("div.product-price")
+    if price_elem:
+        price_text = price_elem[0].text_content().strip()
+        match = price_pattern.search(price_text)
+
+        if match:
+            car_data = {
+                "Qiymət": match.group(1).strip(),
+                "Valyuta": match.group(2)
+            }
+        else:
+            car_data = {
+                "Qiymət": price_text,
+                "Valyuta": ""
+            }
+    else:
+        car_data = {
+            "Qiymət": "",
+            "Valyuta": ""
+        }
+
+    properties = tree.cssselect("div.product-properties__i")
+
+    for prop in properties:
+        label_elem = prop.cssselect("label.product-properties__i-name")
+        value_elem = prop.cssselect("span.product-properties__i-value")
+
+        if label_elem and value_elem:
+            label = label_elem[0].text_content().strip()
+            value = value_elem[0].text_content().strip()
+            car_data[label] = value
+
+    for key, value in car_data.items():
+        print(f"{key}: {value}")
+
+    return car_data
     #print(tree.cssselect('div.products-i__price'))
-    print(tree.cssselect('div.product-price')[0].text_content().strip())
-    #print(tree.cssselect('div.products-i__name'))
-    print(tree.cssselect('div.products-i__name')[0].text_content().strip())
-    #print(tree.cssselect('div.products-i__attributes'))
-    print(tree.cssselect('div.products-i__attributes')[0].text_content().strip())
-    #print(tree.cssselect('div.products-i__datetime'))
-    print(tree.cssselect('div.products-i__datetime')[0].text_content().strip())
-    return car_info
+    #print(tree.cssselect('div.product-properties__i')[0].text_content().strip())
+    #print(tree.cssselect('label.product-properties__i-name')[0].text_content().strip())
+    #print(tree.cssselect('span.product-properties__i-value')[0].text_content().strip())
+    #print("\n\n")
+    ##print(tree.cssselect('div.products-i__name'))
+    #print(tree.cssselect('div.products-i__name')[0].text_content().strip())
+    ##print(tree.cssselect('div.products-i__attributes'))
+    #print(tree.cssselect('div.products-i__attributes')[0].text_content().strip())
+    ##print(tree.cssselect('div.products-i__datetime'))
+    #print(tree.cssselect('div.products-i__datetime')[0].text_content().strip())
+    #return car_info
 
 if __name__ == "__main__":
     #main_bs4()
     #main_lxml(100)
     #get_specific_car_info()
-    get_car_info_from_file()
+    print(get_car_info_from_file())
+    
