@@ -1,13 +1,14 @@
 import requests
 import time
 import re
+from http import HTTPStatus 
 from bs4 import BeautifulSoup # type: ignore
 from lxml import html # type: ignore
 from lxml.etree import tostring
 
 
 INDEX_FILE = "templates/index.html"
-CAR_INFO_FILE = "templates/car_info.html"
+CAR_INFO_FILE = "templates/cars/car_info"
 RESULT_FILE = "templates/result.html"
 TEST_FILE = "templates/test.html"
 CAR_LIST_FILE = "templates/car_list.txt"
@@ -81,32 +82,39 @@ def main_lxml(max_pages: int = 5):
     with open(CAR_LIST_FILE, "w", encoding="utf-8") as file:
         file.write('\n'.join(ids))
     
-def get_car_list():
+def get_car_list(): 
     with open(CAR_LIST_FILE, "r", encoding="utf-8") as file:
         car_ids = file.read().splitlines()
     return car_ids
 
 def get_specific_car_info():
     car_ids = get_car_list()
-    print(car_ids)
+    #print(car_ids)
     for car_id in car_ids:
         car_url = f"{BASE_URL}/autos/{car_id}"
         response = requests.get(car_url, headers=HEADERS)
-        soup = BeautifulSoup(response.text, "html.parser")
-        #print(soup.prettify())
-        #with open(CAR_INFO_FILE, "w", encoding="utf-8") as file:
-        #    file.write(soup.prettify())
+        if response.status_code == HTTPStatus.OK:
+            tree = html.fromstring(response.text)
+            #print(soup.prettify())
+            with open(f"{CAR_INFO_FILE}_{car_id}.html", "w", encoding="utf-8") as file:
+                file.write(tostring(tree, pretty_print=True, encoding='unicode'))
+                print(f"Saved car info for {car_id}")
+        else:
+            print(f"Failed to fetch car info for {car_id}")
 
-def get_car_info_from_file():
-    with open(CAR_INFO_FILE, "r", encoding="utf-8") as file:
+def get_car_info_from_file(car_id: str) -> dict:
+    print(f"Getting car info for {car_id}")
+    with open(f"{CAR_INFO_FILE}_{car_id}.html", "r", encoding="utf-8") as file:
+        print(f"Reading car info for {CAR_INFO_FILE}_{car_id}.html")
         car_info = file.read()
-
     price_pattern = re.compile(r'([\d\s]+?)\s+([A-Z]{3}|\$|AZN)')
 
     tree = html.fromstring(car_info)
+    print(f"Car info: {tree}")
     properties = tree.cssselect("div.product-properties__i")
-
+    print(f"Properties: {properties}")
     price_elem = tree.cssselect("div.product-price")
+    print(f"Price elem: {price_elem}")
     if price_elem:
         price_text = price_elem[0].text_content().strip()
         match = price_pattern.search(price_text)
@@ -159,5 +167,11 @@ if __name__ == "__main__":
     #main_bs4()
     #main_lxml(100)
     #get_specific_car_info()
-    print(get_car_info_from_file())
+    for car_id in get_car_list():
+        if car_id == "9452124":
+            print("stopped")
+            break
+        else:
+            print(get_car_info_from_file(car_id))
+    #print(result)
     
