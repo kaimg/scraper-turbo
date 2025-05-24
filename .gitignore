@@ -11,3 +11,5 @@ wheels/
 
 # Templates
 templates/cars/
+templates/*.json
+templates/*.txt

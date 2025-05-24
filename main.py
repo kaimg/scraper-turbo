@@ -1,6 +1,7 @@
 import requests
 import time
 import re
+import json
 from http import HTTPStatus 
 from bs4 import BeautifulSoup # type: ignore
 from lxml import html # type: ignore
@@ -12,6 +13,7 @@ CAR_INFO_FILE = "templates/cars/car_info"
 RESULT_FILE = "templates/result.html"
 TEST_FILE = "templates/test.html"
 CAR_LIST_FILE = "templates/car_list.txt"
+CAR_RESULTS_FILE = "templates/car_results"
 BASE_URL = "https://turbo.az/"
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
@@ -146,9 +148,6 @@ def get_car_info_from_file(car_id: str) -> dict:
             value = value_elem[0].text_content().strip()
             car_data[label] = value
 
-    for key, value in car_data.items():
-        print(f"{key}: {value}")
-
     return car_data
     #print(tree.cssselect('div.products-i__price'))
     #print(tree.cssselect('div.product-properties__i')[0].text_content().strip())
@@ -163,6 +162,16 @@ def get_car_info_from_file(car_id: str) -> dict:
     #print(tree.cssselect('div.products-i__datetime')[0].text_content().strip())
     #return car_info
 
+def print_car_info(car_info: dict):
+    cars = list()
+    car_json = json.dumps(car_info, ensure_ascii=False, indent=4)
+    print(car_json)
+    cars.append(car_json)
+    return cars
+def write_car_info_to_file(car_info):
+    
+    with open(f"{CAR_RESULTS_FILE}.json", "a", encoding="utf-8") as file:
+        file.write(car_info)
 if __name__ == "__main__":
     #main_bs4()
     #main_lxml(100)
@@ -172,6 +181,11 @@ if __name__ == "__main__":
             print("stopped")
             break
         else:
-            print(get_car_info_from_file(car_id))
+            car_info = get_car_info_from_file(car_id)
+            cars = list()
+            car_json = json.dumps(car_info, ensure_ascii=False, indent=4)
+            print(car_json)
+            cars.append(car_json)
+            write_car_info_to_file(car_json)
     #print(result)
     
