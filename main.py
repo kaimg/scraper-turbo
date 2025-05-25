@@ -168,24 +168,30 @@ def print_car_info(car_info: dict):
     print(car_json)
     cars.append(car_json)
     return cars
+
 def write_car_info_to_file(car_info):
-    
-    with open(f"{CAR_RESULTS_FILE}.json", "a", encoding="utf-8") as file:
-        file.write(car_info)
+    with open(f"{CAR_RESULTS_FILE}.json", "w", encoding="utf-8") as file:
+        json.dump(cars, file, ensure_ascii=False, indent=4)
+    print("Successfully wrote car data to JSON file.")
+
+
 if __name__ == "__main__":
     #main_bs4()
     #main_lxml(100)
     #get_specific_car_info()
+    cars = []
     for car_id in get_car_list():
         if car_id == "9452124":
             print("stopped")
             break
-        else:
-            car_info = get_car_info_from_file(car_id)
-            cars = list()
-            car_json = json.dumps(car_info, ensure_ascii=False, indent=4)
-            print(car_json)
-            cars.append(car_json)
-            write_car_info_to_file(car_json)
+        car_info = get_car_info_from_file(car_id)
+        car_info["index"] = car_id
+        car_json = json.dumps(car_info, ensure_ascii=False, indent=4)
+        #print(car_json)
+        cars.append(car_info)
+    
+    write_car_info_to_file(cars)
+    
+    #print(f"Cars: {cars}")
     #print(result)
     
