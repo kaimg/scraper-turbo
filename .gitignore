@@ -13,3 +13,4 @@ wheels/
 templates/cars/
 templates/*.json
 templates/*.txt
+templates/*.csv

@@ -6,22 +6,7 @@ from http import HTTPStatus
 from bs4 import BeautifulSoup # type: ignore
 from lxml import html # type: ignore
 from lxml.etree import tostring
-
-
-INDEX_FILE = "templates/index.html"
-CAR_INFO_FILE = "templates/cars/car_info"
-RESULT_FILE = "templates/result.html"
-TEST_FILE = "templates/test.html"
-CAR_LIST_FILE = "templates/car_list.txt"
-CAR_RESULTS_FILE = "templates/car_results"
-BASE_URL = "https://turbo.az/"
-HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept-Encoding": "gzip, deflate",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-    "Accept-Language": "en-US,en;q=0.5",
-    "Referer": "https://www.google.com/ ",
-}
+from config import BASE_URL, HEADERS, INDEX_FILE, RESULT_FILE, TEST_FILE, CAR_LIST_FILE, CAR_RESULTS_FILE, CAR_INFO_FILE
 
 def main_bs4():
     url = f"{BASE_URL}/autos"
@@ -170,7 +155,7 @@ def print_car_info(car_info: dict):
     return cars
 
 def write_car_info_to_file(car_info):
-    with open(f"{CAR_RESULTS_FILE}.json", "w", encoding="utf-8") as file:
+    with open(CAR_RESULTS_FILE, "w", encoding="utf-8") as file:
         json.dump(cars, file, ensure_ascii=False, indent=4)
     print("Successfully wrote car data to JSON file.")
 
@@ -179,19 +164,19 @@ if __name__ == "__main__":
     #main_bs4()
     #main_lxml(100)
     #get_specific_car_info()
-    cars = []
-    for car_id in get_car_list():
-        if car_id == "9452124":
-            print("stopped")
-            break
-        car_info = get_car_info_from_file(car_id)
-        car_info["index"] = car_id
-        car_json = json.dumps(car_info, ensure_ascii=False, indent=4)
-        #print(car_json)
-        cars.append(car_info)
-    
-    write_car_info_to_file(cars)
-    
+    #cars = []
+    #for car_id in get_car_list():
+    #    if car_id == "9452124":
+    #        print("stopped")
+    #        break
+    #    car_info = get_car_info_from_file(car_id)
+    #    car_info["index"] = car_id
+    #    #car_json = json.dumps(car_info, ensure_ascii=False, indent=4)
+    #    #print(car_json)
+    #    cars.append(car_info)
+    #
+    #write_car_info_to_file(cars)
+    print(f"CAR_RESULTS_FILE: {CAR_RESULTS_FILE}")
     #print(f"Cars: {cars}")
     #print(result)
     
