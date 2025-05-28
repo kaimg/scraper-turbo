@@ -91,9 +91,14 @@ def get_specific_car_info():
 
 def get_car_info_from_file(car_id: str) -> dict:
     print(f"Getting car info for {car_id}")
-    with open(f"{CAR_INFO_FILE}_{car_id}.html", "r", encoding="utf-8") as file:
-        print(f"Reading car info for {CAR_INFO_FILE}_{car_id}.html")
-        car_info = file.read()
+    try:
+        with open(f"{CAR_INFO_FILE}_{car_id}.html", "r", encoding="utf-8") as file:
+            print(f"Reading car info for {CAR_INFO_FILE}_{car_id}.html")
+            car_info = file.read()
+    except FileNotFoundError:
+        print(f"File not found for {CAR_INFO_FILE}_{car_id}.html")
+        return {}
+    
     price_pattern = re.compile(r'([\d\s]+?)\s+([A-Z]{3}|\$|AZN)')
 
     tree = html.fromstring(car_info)
@@ -156,27 +161,27 @@ def print_car_info(car_info: dict):
 
 def write_car_info_to_file(car_info):
     with open(CAR_RESULTS_FILE, "w", encoding="utf-8") as file:
-        json.dump(cars, file, ensure_ascii=False, indent=4)
+        json.dump(car_info, file, ensure_ascii=False, indent=4)
     print("Successfully wrote car data to JSON file.")
 
 
 if __name__ == "__main__":
     #main_bs4()
-    #main_lxml(100)
+    #main_lxml(1000)
     #get_specific_car_info()
-    #cars = []
-    #for car_id in get_car_list():
-    #    if car_id == "9452124":
-    #        print("stopped")
-    #        break
-    #    car_info = get_car_info_from_file(car_id)
-    #    car_info["index"] = car_id
-    #    #car_json = json.dumps(car_info, ensure_ascii=False, indent=4)
-    #    #print(car_json)
-    #    cars.append(car_info)
-    #
-    #write_car_info_to_file(cars)
-    print(f"CAR_RESULTS_FILE: {CAR_RESULTS_FILE}")
+    cars = []
+    for car_id in get_car_list():
+        #if car_id == "9452124":
+        #    print("stopped")
+        #    break
+        car_info = get_car_info_from_file(car_id)
+        car_info["index"] = car_id
+        car_json = json.dumps(car_info, ensure_ascii=False, indent=4)
+        print(car_json)
+        cars.append(car_info)
+    
+    write_car_info_to_file(cars)
+    #print(f"CAR_RESULTS_FILE: {CAR_RESULTS_FILE}")
     #print(f"Cars: {cars}")
     #print(result)
     
